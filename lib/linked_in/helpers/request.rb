@@ -12,6 +12,8 @@ module LinkedIn
       protected
 
         def get(path, options={})
+          Rails.logger.debug("LinkedIn API: GET #{API_PATH}#{path}")
+          Rails.logger.debug("HEADERS: #{DEFAULT_HEADERS.merge(options)}")
           response = access_token.get("#{API_PATH}#{path}", DEFAULT_HEADERS.merge(options))
           raise_errors(response)
           response.body

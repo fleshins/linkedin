@@ -2,6 +2,14 @@ module LinkedIn
   module Api
 
     module QueryMethods
+      
+      def people_search(options={})
+        path = "/people-search"
+        options['sort'] = 'connections'
+        linkedin_id = options.delete(:linkedin_id)
+        options['company-name'] = Company.get(linkedin_id).linkedin_name
+        simple_query(path, options)
+      end
 
       def profile(options={})
         path = person_path(options)
@@ -88,18 +96,19 @@ module LinkedIn
         end
 
         def company_path(options)
-          path = "/companies"
-
-          if domain = options.delete(:domain)
-            path += "?email-domain=#{CGI.escape(domain)}"
-          elsif id = options.delete(:id)
-            path += "/id=#{id}"
+          path = "/companies?"
+          if id = options.delete(:id)
+            path = "/companies/#{id}"
+            field_selectors = options.delete(:field_selectors)
+            path = "/companies/#{id}:(#{field_selectors})" if field_selectors
+          elsif domain = options.delete(:domain)
+            path += "email-domain=#{CGI.escape(domain)}"
           elsif url = options.delete(:url)
-            path += "/url=#{CGI.escape(url)}"
+            path += "url=#{CGI.escape(url)}"
           elsif name = options.delete(:name)
-            path += "/universal-name=#{CGI.escape(name)}"
+            path += "/company-search?keywords=#{name}"
           else
-            path += "/~"
+            path += "~"
           end
         end
 
